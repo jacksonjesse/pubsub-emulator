@@ -1,18 +1,32 @@
-FROM google/cloud-sdk:291.0.0-alpine
+FROM google/cloud-sdk:293.0.0-slim
 
 ENV PUBSUB_PROJECT test
+ENV PUBSUB_TOPIC test
 ENV PUBSUB_PORT 8085
 
-# Install Java for the Pub/Sub emulator
-RUN apk --update add openjdk11-jre
+# Install gcloud Pub/Sub Python module
+COPY requirements.txt /
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
 
 # Create a volume for Pub/Sub data to reside
 RUN mkdir -p /var/pubsub
 VOLUME /var/pubsub
 
-# Install emulator
-RUN gcloud components install pubsub-emulator beta --quiet
+# add an extra source here for Java as this does not come by default in Buster
+RUN echo "deb http://ftp.us.debian.org/debian sid main" | tee -a /etc/apt/sources.list
+RUN apt-get update
+
+# Remove this package as Java tries to install an older version which this gets in the way of
+RUN apt-get -yq remove libgcc-8-dev
+
+# Install Java for the Pub/Sub emulator, and the emulator
+RUN apt-get -yq install openjdk-8-jdk google-cloud-sdk-pubsub-emulator
+
+COPY create_topic.py /
+COPY start.sh /
+COPY wait-for-it.sh /
 
 EXPOSE ${PUBSUB_PORT}
 
-CMD ["sh", "-c", "gcloud beta emulators pubsub start --project=${PUBSUB_PROJECT} --data-dir=/var/pubsub --host-port=0.0.0.0:${PUBSUB_PORT} --log-http --verbosity=debug --user-output-enabled"]
+CMD ["./start.sh"]
