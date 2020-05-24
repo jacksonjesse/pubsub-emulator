@@ -3,11 +3,7 @@ FROM google/cloud-sdk:293.0.0-slim
 ENV PUBSUB_PROJECT test
 ENV PUBSUB_TOPIC test
 ENV PUBSUB_PORT 8085
-
-# Install gcloud Pub/Sub Python module
-COPY requirements.txt /
-RUN pip3 install --upgrade pip
-RUN pip3 install -r requirements.txt
+ENV PUBSUB_EMULATOR_HOST ${PUBSUB_PORT}
 
 # Create a volume for Pub/Sub data to reside
 RUN mkdir -p /var/pubsub
@@ -26,6 +22,11 @@ RUN apt-get -yq install openjdk-8-jdk google-cloud-sdk-pubsub-emulator
 COPY create_topic.py /
 COPY start.sh /
 COPY wait-for-it.sh /
+
+# Install gcloud Pub/Sub Python module
+COPY requirements.txt /
+RUN python3 -m pip install --user --upgrade pip
+RUN python3 -m pip install --user -r requirements.txt
 
 EXPOSE ${PUBSUB_PORT}
 
