@@ -1,7 +1,8 @@
 FROM google/cloud-sdk:293.0.0-slim
 
-ENV PUBSUB_PROJECT test
-ENV PUBSUB_TOPIC test
+ENV PUBSUB_PROJECT testproject
+ENV PUBSUB_TOPIC testtopic
+ENV PUBSUB_SUBSCRIPTION testsubscription
 ENV PUBSUB_PORT 8085
 ENV PUBSUB_EMULATOR_HOST ${PUBSUB_PORT}
 
@@ -19,7 +20,7 @@ RUN apt-get -yq remove libgcc-8-dev
 # Install Java for the Pub/Sub emulator, and the emulator
 RUN apt-get -yq install openjdk-8-jdk google-cloud-sdk-pubsub-emulator
 
-COPY create_topic.py /
+COPY create_topic_and_subscription.py /
 COPY start.sh /
 COPY wait-for-it.sh /
 
