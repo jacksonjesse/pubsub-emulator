@@ -26,6 +26,8 @@ version: '3'
   services:
     pubsub:
       image: jessejacksondocker/pubsub-emulator:latest
+      ports:
+        - "8085:8085"
       environment:
         - PUBSUB_PORT=10101
         - PUBSUB_PROJECT=myproject
